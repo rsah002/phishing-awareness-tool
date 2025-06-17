@@ -1,2 +1,295 @@
 # phishing-awareness-tool
-awareness about phishing attacks 
+# awareness about phishing attacks 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phishing Awareness Simulator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(120deg, #e0e7ff 0%, #f0fdfa 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        .container {
+            background: #fff;
+            margin-top: 40px;
+            padding: 32px 28px 28px 28px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+            width: 100%;
+            max-width: 500px;
+        }
+        h1 {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        .intro {
+            text-align: center;
+            color: #444;
+            margin-bottom: 24px;
+            font-size: 1.1em;
+        }
+        .sim-email {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 18px 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .sim-email .from {
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        .sim-email .subject {
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .sim-email .body {
+            color: #222;
+            margin-bottom: 8px;
+        }
+        .sim-email .link {
+            color: #2563eb;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .actions button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #4f8cff;
+            color: #fff;
+            transition: background 0.2s;
+        }
+        .actions button:hover {
+            background: #2563eb;
+        }
+        .feedback {
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .feedback.correct {
+            background: #d1fae5;
+            color: #15803d;
+        }
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .score {
+            text-align: center;
+            font-size: 1.2em;
+            margin-top: 18px;
+            color: #2563eb;
+        }
+        .explanation {
+            background: #fef9c3;
+            color: #92400e;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0 0 0;
+            font-size: 0.98em;
+        }
+        .restart-btn {
+            display: block;
+            margin: 24px auto 0 auto;
+            padding: 10px 28px;
+            background: #22d3ee;
+            color: #0e7490;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .restart-btn:hover {
+            background: #06b6d4;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Phishing Awareness Simulator</h1>
+        <div class="intro" id="intro">
+            Test your ability to spot phishing emails! For each example, decide if it's a phishing attempt or a safe message. Get instant feedback and learn how to stay safe online.
+        </div>
+        <div id="quiz-area"></div>
+        <div class="score" id="score-area"></div>
+        <button class="restart-btn" id="restart-btn" style="display:none;">Restart Quiz</button>
+    </div>
+    <script>
+        const scenarios = [
+            {
+                from: 'IT Support <it-support@company.com>',
+                subject: 'Urgent: Password Expiry Notification',
+                body: 'Your password will expire in 24 hours. Please reset it immediately to avoid losing access.',
+                link: 'Reset Password',
+                url: 'http://company-support-reset.com',
+                isPhishing: true,
+                explanation: 'The link is not the official company domain. Always check URLs carefully.'
+            },
+            {
+                from: 'Amazon <no-reply@amazon.com>',
+                subject: 'Order Confirmation',
+                body: 'Thank you for your purchase! Your order #123456 will be shipped soon.',
+                link: '',
+                url: '',
+                isPhishing: false,
+                explanation: 'This is a typical order confirmation with no suspicious links or requests.'
+            },
+            {
+                from: 'Bank of Example <security@bankofexample.com>',
+                subject: 'Account Locked',
+                body: 'We have detected suspicious activity. Please verify your account by clicking the link below.',
+                link: 'Verify Account',
+                url: 'http://bankofexamp1e.com',
+                isPhishing: true,
+                explanation: 'The domain is misspelled (examp1e instead of example). This is a common phishing trick.'
+            },
+            {
+                from: 'HR Department <hr@company.com>',
+                subject: 'Annual Leave Policy Update',
+                body: 'Please review the updated annual leave policy attached to this email.',
+                link: '',
+                url: '',
+                isPhishing: false,
+                explanation: 'No links or requests for sensitive information. This is a normal internal email.'
+            },
+            {
+                from: 'PayPal <service@paypal.com>',
+                subject: 'Unusual Login Attempt',
+                body: 'We noticed a login attempt from a new device. If this was not you, please secure your account.',
+                link: 'Secure Account',
+                url: 'http://paypal-security-alert.com',
+                isPhishing: true,
+                explanation: 'The link is not the official PayPal domain. Always verify URLs before clicking.'
+            },
+            {
+                from: 'Friend <friend@gmail.com>',
+                subject: 'Check out these photos!',
+                body: 'Hey! I found some old photos of us. Click the link to see them.',
+                link: 'View Photos',
+                url: 'http://malicious-photos.com',
+                isPhishing: true,
+                explanation: 'Unexpected links from friends can be phishing. Always verify with the sender.'
+            },
+            {
+                from: 'Company Newsletter <newsletter@company.com>',
+                subject: 'Monthly Updates',
+                body: 'Here are the latest updates from our company. No action required.',
+                link: '',
+                url: '',
+                isPhishing: false,
+                explanation: 'No suspicious links or urgent requests. This is a safe newsletter.'
+            },
+            {
+                from: 'Google <no-reply@google.com>',
+                subject: 'Security Alert',
+                body: 'Someone tried to sign in to your account. If this was not you, change your password.',
+                link: 'Change Password',
+                url: 'https://accounts.google.com/security',
+                isPhishing: false,
+                explanation: 'The link is the official Google domain. This is a legitimate security alert.'
+            }
+        ];
+
+        let current = 0;
+        let score = 0;
+
+        const quizArea = document.getElementById('quiz-area');
+        const scoreArea = document.getElementById('score-area');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function showScenario(idx) {
+            const s = scenarios[idx];
+            let html = `<div class='sim-email'>`;
+            html += `<div class='from'><strong>From:</strong> ${s.from}</div>`;
+            html += `<div class='subject'><strong>Subject:</strong> ${s.subject}</div>`;
+            html += `<div class='body'>${s.body}</div>`;
+            if (s.link && s.url) {
+                html += `<div><a class='link' href='${s.url}' target='_blank'>${s.link}</a></div>`;
+            }
+            html += `</div>`;
+            html += `<div class='actions'>
+                        <button onclick='window.answerScenario(true)'>Phishing</button>
+                        <button onclick='window.answerScenario(false)'>Safe</button>
+                    </div>`;
+            quizArea.innerHTML = html;
+            scoreArea.textContent = `Scenario ${idx + 1} of ${scenarios.length}`;
+        }
+
+        window.answerScenario = function(isPhishing) {
+            const s = scenarios[current];
+            let feedback = '';
+            let correct = false;
+            if (isPhishing === s.isPhishing) {
+                score++;
+                feedback = `<div class='feedback correct'>Correct! ${s.isPhishing ? 'This is a phishing attempt.' : 'This is a safe message.'}</div>`;
+                correct = true;
+            } else {
+                feedback = `<div class='feedback incorrect'>Incorrect. ${s.isPhishing ? 'This was a phishing attempt.' : 'This was a safe message.'}</div>`;
+            }
+            feedback += `<div class='explanation'><strong>Explanation:</strong> ${s.explanation}</div>`;
+            quizArea.innerHTML += feedback;
+            setTimeout(() => {
+                current++;
+                if (current < scenarios.length) {
+                    showScenario(current);
+                } else {
+                    showFinalScore();
+                }
+            }, 2200);
+        };
+
+        function showFinalScore() {
+            quizArea.innerHTML = '';
+            scoreArea.innerHTML = `<strong>Your Score: ${score} / ${scenarios.length}</strong>`;
+            let msg = '';
+            if (score === scenarios.length) {
+                msg = 'Excellent! You spotted every phishing attempt.';
+            } else if (score >= scenarios.length * 0.75) {
+                msg = 'Great job! You have a good eye for phishing.';
+            } else if (score >= scenarios.length * 0.5) {
+                msg = 'Not bad, but review the explanations to improve your skills.';
+            } else {
+                msg = 'Consider reviewing the explanations and learning more about phishing.';
+            }
+            quizArea.innerHTML = `<div class='feedback' style='background:#f1f5f9;color:#222;'>${msg}</div>`;
+            restartBtn.style.display = 'block';
+        }
+
+        restartBtn.onclick = function() {
+            current = 0;
+            score = 0;
+            restartBtn.style.display = 'none';
+            showScenario(current);
+            scoreArea.textContent = '';
+        };
+
+        // Start the quiz
+        showScenario(current);
+    </script>
+</body>
+</html> 
